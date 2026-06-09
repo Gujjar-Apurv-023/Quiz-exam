@@ -1,0 +1,91 @@
+# Copyright (c) 2026 Apurv Gujjar (apurv-gujjar.me). All rights reserved.
+version: '3.8'
+
+services:  # PostgreSQL Database Service
+  postgres:
+    image: postgres:16-alpine
+    container_name: aws-exam-db
+    environment:
+      POSTGRES_USER: ${PGUSER:-exam_user}
+      POSTGRES_PASSWORD: ${PGPASSWORD:-exam_password}
+      POSTGRES_DB: ${PGDATABASE:-exam_db}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PGUSER:-exam_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - exam-network
+
+  # Backend API Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aws-exam-backend
+    environment:
+      PGUSER: ${PGUSER:-exam_user}
+      PGPASSWORD: ${PGPASSWORD:-exam_password}
+      PGHOST: postgres
+      PGPORT: 5432
+      PGDATABASE: ${PGDATABASE:-exam_db}
+      PGSSL: "false"
+      PORT: 8000
+      NODE_ENV: production
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend/.env:/usr/src/app/.env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - exam-network
+    restart: unless-stopped
+
+  # Frontend Web Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: aws-exam-frontend
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - exam-network
+    restart: unless-stopped
+    environment:
+      BACKEND_URL: http://backend:8000
+
+networks:
+  exam-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local  app:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: aws-exam-sandbox-app
+    restart: always
+    ports:
+      - "8000:8000"
+    env_file:
+      - backend/.env

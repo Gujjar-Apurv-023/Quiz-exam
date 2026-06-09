@@ -1,0 +1,17 @@
+{
+  "name": "aws-clf-c02-exam-sandbox-backend",
+  "version": "2.4.0",
+  "description": "Full-stack backend server for CLF-C02 Exam Sandbox",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "pg": "^8.11.5"
+  },
+  "author": "Apurv Gujjar",
+  "license": "ISC"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "aws-clf-c02-exam-sandbox-frontend",
+  "version": "2.4.0",
+  "description": "Frontend static assets for CLF-C02 Exam Sandbox",
+  "scripts": {
+    "serve": "nginx -g 'daemon off;'"
+  }
+}
