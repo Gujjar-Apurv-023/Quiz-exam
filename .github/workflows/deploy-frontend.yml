@@ -10,11 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      AWS_REGION: us-east-1
-      AWS_ACCOUNT_ID: 144905518160
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
       ECR_REPOSITORY: exam-frontend
       IMAGE_TAG: latest
-      ECR_REGISTRY: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
 
     steps:
       - name: Checkout code
@@ -33,7 +32,8 @@ jobs:
 
       - name: Build, tag and push frontend image
         run: |
+          ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
           docker build -t exam-frontend ./frontend
-          docker tag exam-frontend:latest $ECR_REGISTRY/$ECR_REPOSITORY:latest
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          docker tag exam-frontend:latest "$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:latest"
           echo "✓ Frontend image pushed to ECR: $ECR_REGISTRY/$ECR_REPOSITORY:latest"
