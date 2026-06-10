@@ -38,3 +38,11 @@ jobs:
           docker tag exam-frontend:latest "$ECR_REGISTRY/$ECR_REPOSITORY:latest"
           docker push "$ECR_REGISTRY/$ECR_REPOSITORY:latest"
           echo "✓ Frontend image pushed to ECR: $ECR_REGISTRY/$ECR_REPOSITORY:latest"
+
+      - name: Deploy new image to ECS
+        run: |
+          aws ecs update-service \
+            --cluster exam-cluster \
+            --service exam-frontend-task-service-6mr6reqf \
+            --force-new-deployment
+          echo "✓ ECS update triggered for exam-frontend-task-service"
